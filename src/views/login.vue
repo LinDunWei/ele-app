@@ -23,7 +23,7 @@
         </div>
         <!-- 登录按钮 -->
         <div class="login_btn">
-            <button>登录</button>
+            <button :disabled="isClick" @click="handleLogin">登录</button>
         </div>
     </div>
 
@@ -45,7 +45,40 @@ export default {
             disabled: false
         }
     },
+    computed:{
+        isClick(){
+            if(!this.phone || !this.verifyCode){
+                return true
+            }else{
+                return false
+            }
+        }
+    },
     methods:{
+        //点击登录
+        handleLogin(){
+            //取消错误提醒
+            this.error = {}
+            //发送请求
+            this.$axios.post("/api/posts/sms_back",{
+                phone: this.phone,
+                code: this.verifyCode
+            }).then(res=>{
+                //成功，保存登录状态,转首页
+                localStorage.setItem("ele_login",true);    //这里保存的ele_login登录状态会作为路由重定向判断
+                this.$router.push("/");
+            }).catch(err => {
+                console.log(err);
+                console.log(err.response);
+                // 返回错误信息
+                this.error = {
+                    code: err.response.data.msg
+                };
+            });
+
+        },
+
+        //点击获取验证码
         getVerifyCode(){
             //判断validatePhone执行返回结果
             if(this.validatePhone()){
@@ -62,6 +95,7 @@ export default {
                 })
             }
         },
+        //点击获取验证码60s倒计时
         validateBtn(){
             let time = 60;
             let timer = setInterval(()=>{
@@ -76,6 +110,7 @@ export default {
                 }
             },1000);
         },
+        //手机号格式校验
         validatePhone(){
             // console.log(this.phone);
             // return;
