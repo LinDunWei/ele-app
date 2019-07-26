@@ -54,7 +54,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 可以通过谷歌浏览器vue插件查看已存储的定位地理信息。
 
-图片。。。。
+![]( )
 
 ```vue
 <template>
