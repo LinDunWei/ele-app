@@ -32,175 +32,35 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 
-## 内容总结 2019/7/11   
+## 内容总结 2019/7/26   
 
-> 阴天，这段时间由于一些原因学习断断续续。为了衔接好接下来vuex存储定位信息的章节，又重新回温一下vuex的知识点。
+> 计划赶不上变化的7月，希望下半年能变好。
+>
+> 七月二十六回家的第三天，晴，远离了广州的高楼大厦车水马龙，回归小镇的平静
 
-```js
-import Vue from 'vue'
-import Vuex from 'vuex'
+设置收获地址页（address组件页）
 
-Vue.use(Vuex)
-
-//type
-const types= {
-  SET_LOCATION : "SET_LOCATION",
-  SET_ADDRESS : "SET_ADDRESS"
-}
-
-//state
-const state = {
-  location : {},
-  address: ""
-}
-
-//getters
-const getters = {
-  location : state => state.location,
-  address : state => state.address 
-}
-
-
-//mutations
-const mutations = {
-  [types.SET_LOCATION](state,location){
-    if(location){
-      state.location = location
-    }else{
-      state.location = null
-    }
-  },
-  [types.SET_ADDRESS](state,address){
-    if(address){
-      state.address = address
-    }else{
-      state.address = null
-    }
-  }
-}
-
-//actions
-const actions = {
-  setLocation: ({commit},location) => {
-    // console.log(location);
-    commit(types.SET_LOCATION,location);
-  },
-  setAddress: ({commit},address) => {
-    commit(types.SET_ADDRESS,address);
-  }
-}
-
-export default new Vuex.Store({
-  state,
-  getters,
-  mutations,
-  actions
-})
-
-```
-
-通过vuex来存储定位信息，公共数据池state中定义存储的`location`和`address`，外部组件中如果需要拿数据池的数据则用`getters`
-
-`mutations`作为对state中数据的修改的对象，但我们在**app.vue**中获取了定位信息之后要将信息存储到**state**中对应的`location`和`address`，不能直接调用**mutations**，原因是我们获取定位本来就属于**异步操作**，所以同步操作的mutations不适用。那么vuex就刚刚好用进行异步操作的**actions**。
-
-另外，我们不能直接修改state。**在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的，将会抛出错误。** 
-
-在vuex文件中，actions对象里面定义两个函数`setLocation`和`setAddress`，通过**commit**函数可以将数据提交到mutations对象，commit函数第一个参数是mutations中的函数名，第二个参数是要提交的数据。
-
-那在外部使用actions，其实和使用mutations差不多，只是不再使用commit，而是用**dispatch**，【派发】。
-
-第一个参数是actions中的函数名，第二个参数是提交到actions的数据。
+配置路由
 
 ```js
-getLocation(){
-      const s = this;
-      AMap.plugin('AMap.Geolocation', function() {
-        var geolocation = new AMap.Geolocation({
-          // 是否使用高精度定位，默认：true
-          enableHighAccuracy: true,
-          // 设置定位超时时间，默认：无穷大
-          timeout: 10000,
-          // 定位按钮的停靠位置的偏移量，默认：Pixel(10, 20)
-          //buttonOffset: new AMap.Pixel(10, 20),
-          //  定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
-          //zoomToAccuracy: true,     
-          //  定位按钮的排放位置,  RB表示右下
-          //buttonPosition: 'RB'
-        })
-
-        geolocation.getCurrentPosition()
-        AMap.event.addListener(geolocation, 'complete', onComplete)
-        AMap.event.addListener(geolocation, 'error', onError)
-
-        function onComplete (data) {
-          // data是具体的定位信息
-          console.log(data);
-          s.$store.dispatch("setLocation",data)      //通过dispatch触发actions
-          s.$store.dispatch("setAddress",data.formattedAddress)
-        }
-
-        function onError (data) {
-          // 定位出错
-          console.log(data);
-          s.getLngLatLoaction();
-        }
-      })
-    },
+{
+  path:'/address',
+  name: 'address',
+  component: ()=> import('./views/Address.vue')
+},
 ```
 
-```js
-getLngLatLoaction(){
-      const s = this;
-      AMap.plugin('AMap.CitySearch', function () {
-      var citySearch = new AMap.CitySearch()
-      citySearch.getLocalCity(function (status, result) {
-        if (status === 'complete' && result.info === 'OK') {
-          // 查询成功，result即为当前所在城市信息
-          console.log(result);
-          
-        // 逆向地理编码方法
-          AMap.plugin('AMap.Geocoder', function() {
-            var geocoder = new AMap.Geocoder({
-              // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
-              city: result.adcode
-            })
-          
-            var lnglat = result.rectangle.split(';')[1].split(',')
-            // console.log(lnglat);
-            geocoder.getAddress(lnglat, function(status, data) {
-              if (status === 'complete' && data.info === 'OK') {
-                  // result为对应的地理位置详细信息
-                  console.log(data);
-                  
-                  //dispatch触发actions
-                  s.$store.dispatch("setLocation",{
-                    addressComponent:{
-                      city: result.city,
-                      province: result.province
-                    },
-                    formattedAddress: data.regeocode.formattedAddress
-                  }),
-                  s.$store.dispatch("setAddress",data.regeocode.formattedAddress)
-              }
-            })
-          })
-        }
-      })
-    })
-    }
-```
+在home页点击地址进入address页，同时路由传参，传入address所需的city。定位的city通过计算属性从vuex中拿取，vuex中的location对象中有addressComponent 对象，下有所需city。
 
+可以通过谷歌浏览器vue插件查看已存储的定位地理信息。
 
-
-
-
-接下来在home组件中显示定位信息
+图片。。。。
 
 ```vue
 <template>
     <div class="home">
         <div class="header">
-            <div class="address_map">
+            <div class="address_map" @click="$router.push({name: 'address', params: {city : city}})">
                 <i class="fa fa-map-marker"></i>
                 <span>{{address}}</span>
                 <i class="fa fa-sort-desc"></i>
@@ -213,15 +73,148 @@ getLngLatLoaction(){
     </div>
 
 </template>
+```
 
-<script>
-export default {
-    computed:{
+```js
+computed:{
         address(){
             return this.$store.getters.address
+        },
+        city(){
+          return this.$store.getters.location.addressComponent.city || this.$store.getters.location.addressComponent.province
+        }
+```
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+封装address页所需的头部组件 Header.vue, 这个小组件也没啥好说，普通的组件传值。在address中传入需要的数据就可以。
+
+```vue
+<template>
+    <div class="header">
+        <!-- 左侧返回 -->
+        <div class="header-button is-left" v-show="isLeft">
+            <i class="fa fa-chevron-left"></i>
+            <button @click="$router.go(-1)">返回</button>
+        </div>
+        <!-- 中间标题 -->
+        <h1 class="header-title">{{title}}</h1>
+    </div>
+
+</template>
+```
+
+```js
+<script>
+export default {
+    props:{
+        title: String,
+        isLeft:{
+            type: Boolean,
+            default: false
         }
     }
 }
 </script>
+```
+
+封装显示当前定位组件 location.vue 。 不用赘述。
+
+```vue
+<template>
+    <div>
+        <div class="title">当前定位</div>
+        <div class="des">
+            <i class="fa fa-location-arrow"></i>
+            <span>{{address}}</span>
+        </div>
+    </div>
+
+</template>
+
+<script>
+export default {
+    props: {
+        address: String
+    }
+}
+</script>
+```
+
+编写address组件页。头部组件下是一个input输入框，双向数据绑定变量search_val，在watch中进行对search_val的监听。
+
+```js
+watch:{
+      search_val(){
+        this.searchPlace();
+      }
+    },
+```
+
+接收路由传参
+
+```js
+beforeRouteEnter(to,from,next){
+        next(vm => {
+            vm.city = to.params.city
+        })
+    },
+```
+
+引入header和location组件之后，location组件需要传入需要显示的地理信息数据。在计算属性中通过vuex的getter拿到formattedAddress ，这个变量就是存储具体地理信息，也是可以在vue插件中看到，如上图。
+
+```js
+ computed:{
+        address(){
+            return this.$store.getters.location.formattedAddress;
+        }
+    },
+```
+
+watch监听了函数search_val，input每次的输入都会触发searchPlace函数的执行。这里我们需要靠searchPlace函数做关键字检索位置信息。
+
+高德api提供了这一功能的实现， `输入提示与POI搜索`，这里使用`输入提示插件`，把代码复制粘贴过来到searchPlace函数中，需做一些修改。autoOptions  中的city代码默认是全国，改为我们当前定位的市级，city。
+
+`result` 作为回调参数，里面的`tips` 数组就是检索到的地理信息，将其存入我们定义好的数组`areaList` 中进行遍历显示出来。
+
+```vue
+<template>
+    <div class="address">
+        <Header :isLeft="true" title="请选择收货地址" />
+        <div class="city_search">
+            <div class="search">
+                <span class="city" @click="$router.push('/city')">
+                    {{city}}
+                    <i class="fa fa-angle-down"></i>
+                </span>
+                <i class="fa fa-search"></i>
+                <input type="text" placeholder="小区/写字楼/学校等" v-model="search_val">
+            </div>
+            <Location :address="address" />
+        </div>
+
+        <div class="area">
+          <ul class="area_list" v-for="(item,index) in areaList" :key="index">
+            <li @click="selectAddress(item)">
+              <h4>{{item.name}}</h4>
+              <p>{{item.district}}{{item.address}}</p>
+            </li>
+          </ul>
+        </div>
+    </div>
+
+</template>
+```
+
+ `v-for`遍历数组`areaList` ，给下面的`li`标签绑定点击事件，我们将选择的地理位置信息存储到vuex中，并返回到home页。
+
+```js
+selectAddress(item){
+        this.$store.dispatch(
+          "setAddress",
+          item.district + item.address + item.name
+        );
+        this.$router.push("/home");
+      }
 ```
 
