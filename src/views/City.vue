@@ -8,10 +8,11 @@
             <button @click="$router.push({name:'address',params:{city:city}})">取消</button>
         </div>
 
-        <div>
+        <div style="height:100%">
             <div class="location">
                 <Location :address="city"/>
             </div>
+            <Alphabet ref="allcity" :cityInfo = "cityInfo" :keys = "keys" />
         </div>
     </div>
 
@@ -19,19 +20,44 @@
 
 <script>
 import Location from '../components/Location'
+import Alphabet from '../components/Alphabet'
 export default {
+    created(){
+        this.getCityInfo();
+    },
     data(){
         return{
-            city_val: ''
+            city_val: '',
+            cityInfo: null,
+            keys:[]
         }
     },
     components : {
-        Location
+        Location,
+        Alphabet
     },
     computed:{
         city(){
             //location下面包含有addressComponent，里面有需要的city
           return this.$store.getters.location.addressComponent.city || this.$store.getters.location.addressComponent.province
+        }
+    },
+    methods:{
+        getCityInfo(){
+            this.$axios("/api/posts/cities").then(res=>{
+                // console.log(res.data);
+                this.cityInfo = res.data;
+                this.keys = Object.keys(res.data);
+                this.keys.pop();  //移除最后一项
+                this.keys.sort();  //sort默认按照ascii字母表排序
+
+                this.$nextTick(()=>{
+                    this.$refs.allcity.initScroll();
+                })
+                // this.$refs.allcity.initScroll();
+            }).catch(err=>{
+                // console.log(err);
+            })
         }
     }
 }
