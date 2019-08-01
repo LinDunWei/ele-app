@@ -8,11 +8,17 @@
             <button @click="$router.push({name:'address',params:{city:city}})">取消</button>
         </div>
 
-        <div style="height:100%">
+        <div style="height:100%" v-if="searchList.length == 0">
             <div class="location">
-                <Location :address="city"/>
+                <Location @click="selectCity({name:city})" :address="city"/>
             </div>
             <Alphabet @selectCity="selectCity" ref="allcity" :cityInfo = "cityInfo" :keys = "keys" />
+        </div>
+
+        <div class="search_list">
+            <ul>
+                <li @click="selectCity(item)" v-for="(item,index) in searchList" :key="index">{{item.name}}</li>
+            </ul>
         </div>
     </div>
 
@@ -29,7 +35,14 @@ export default {
         return{
             city_val: '',
             cityInfo: null,
-            keys:[]
+            keys:[],
+            allCities: [],   
+            searchList:[]
+        }
+    },
+    watch:{
+        city_val(){
+            this.searchCity();
         }
     },
     components : {
@@ -45,7 +58,7 @@ export default {
     methods:{
         getCityInfo(){
             this.$axios("/api/posts/cities").then(res=>{
-                // console.log(res.data);
+                console.log(res.data);
                 this.cityInfo = res.data;
                 this.keys = Object.keys(res.data);
                 this.keys.pop();  //移除最后一项
@@ -55,12 +68,34 @@ export default {
                     this.$refs.allcity.initScroll();
                 })
                 // this.$refs.allcity.initScroll();
+
+
+
+                //存储所有的城市，搜索过滤用的     
+                this.keys.forEach(key=>{
+                    // console.log(key);  
+                    this.cityInfo[key].forEach(city =>{
+                        // console.log(city); 拿到每个字母key中的城市
+                        this.allCities.push(city);
+                    })
+                })
+
+
             }).catch(err=>{
                 // console.log(err);
             })
         },
         selectCity(city){
-            this.$router.push({name:'address',params:{city:city}})
+            this.$router.push({name:'address',params:{city:city.name}})
+        },
+        searchCity(){
+            if(!this.city_val){
+                this.searchList = []
+            }else{
+                this.searchList = this.allCities.filter(item=>{
+                    return item.name.indexOf(this.city_val) != -1;  //indexof函数，如果item.name和this.city_val不匹配，返回是-1
+                })
+            }
         }
     }
 }

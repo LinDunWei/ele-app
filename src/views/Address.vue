@@ -10,7 +10,7 @@
                 <i class="fa fa-search"></i>
                 <input type="text" placeholder="小区/写字楼/学校等" v-model="search_val">
             </div>
-            <Location :address="address" />
+            <Location @click="selectAddress" :address="address" />
         </div>
 
         <div class="area">
@@ -76,10 +76,14 @@ export default {
 
 
       selectAddress(item){
-        this.$store.dispatch(
-          "setAddress",
-          item.district + item.address + item.name
-        );
+        if(!item){
+          this.$store.dispatch('setAddress',this.address)
+        }else{
+          this.$store.dispatch(
+            "setAddress",
+            item.district + item.address + item.name
+          );
+        }
         this.$router.push("/home");
       }
     }
