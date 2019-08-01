@@ -2,25 +2,33 @@
     <div class="area" ref="area_scroll" v-if="cityInfo">
         <div class="scroll_wrap">
             <!-- 热门城市 -->
-            <div class="hot_wrap">
+            <div class="hot_wrap cityList">
                 <div class="title">热门城市</div>
                 <ul class="hot_city">
-                    <li v-for="(item,index) in cityInfo.hotCities" :key="index">{{item.name}}</li>
+                    <li @click="$emit('selectCity',item.name)" v-for="(item,index) in cityInfo.hotCities" :key="index">{{item.name}}</li>
                 </ul>
             </div>
             <!-- 所有城市 -->
             <div class="city_wrap">
                 <!-- 循环按字母排序的key -->
-                <div class="city_content" v-for="(item,index) in keys" :key="index">
+                <div class="city_content cityList" v-for="(item,index) in keys" :key="index">
                     <div class="title">{{item}}</div>
                     <!-- 根据字母展示城市 -->
                     <ul>
-                        <li v-for="(city,index) in cityInfo[item]" :key="index">
+                        <li @click="$emit('selectCity',city.name)" v-for="(city,index) in cityInfo[item]" :key="index">
                             {{city.name}}
                         </li>
                     </ul>
                 </div>
             </div>
+        </div>
+
+        <!-- 右边的字母 -->
+        <div class="area_keys">
+            <ul>
+                <li @click="selectKey(0)">#</li>
+                <li @click="selectKey(index+1)" v-for="(item,index) in keys" :key="index">{{item}}</li>
+            </ul>
         </div>
     </div>
 
@@ -43,6 +51,18 @@ export default {
             this.scroll = new BScroll(this.$refs.area_scroll,{
                 click: true
             })
+        },
+        selectKey(index){
+            // console.log(this.$refs.area_scroll.getElementsByClassName("cityList"));
+
+            // 获得所有的dom
+            const cityList = this.$refs.area_scroll.getElementsByClassName("cityList");
+            //要去的对应的dom
+            const el = cityList[index];
+
+            //滚到到指定位置
+            this.scroll.scrollToElement(el,250);  //scrollToElement(要去的dom位置,时间)
+
         }
     }
 }
