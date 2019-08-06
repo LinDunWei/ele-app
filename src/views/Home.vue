@@ -6,25 +6,69 @@
                 <span>{{address}}</span>
                 <i class="fa fa-sort-desc"></i>
             </div>
+        </div>
+        <div class="search_wrap">
             <div class="shop_search">
                 <i class="fa fa-search"></i>
                 搜索商家 商家名称
             </div>
         </div>
+        <div id="container">
+          <!-- 轮播 -->
+          <mt-swipe :auto="4000" class="swiper">
+            <mt-swipe-item v-for="(img,index) in swipeImgs" :key="index">
+              <img :src="img" alt="">
+            </mt-swipe-item>
+          </mt-swipe>
+
+          <!-- 分类 -->
+          <mt-swipe :show-indicators="false" :auto="0" class="entries">
+            <mt-swipe-item class="entry_wrap" v-for="(entry,i) in entries" :key="i">
+              <div class="foodentry" v-for="(item,index) in entry" :key="index">
+                <div class="img_warp">
+                  <img :src="item.image" alt="">
+                </div>
+                <span>{{item.name}}</span>
+              </div>
+            </mt-swipe-item>
+          </mt-swipe>
+        </div>
+
+        <!-- 推荐商家 -->
+        <div class="shoplist-title">推荐商家</div>
     </div>
 
 </template>
 
 <script>
+import { Swipe, SwipeItem } from 'mint-ui';
 export default {
-    computed:{
-        address(){
-            return this.$store.getters.address
-        },
-        city(){
-          return this.$store.getters.location.addressComponent.city || this.$store.getters.location.addressComponent.province
-        }
+  created(){
+      this.getData();
+  },
+  data(){
+    return{
+      swipeImgs: [],
+      entries: []
     }
+  },
+  computed:{
+      address(){
+          return this.$store.getters.address
+      },
+      city(){
+        return this.$store.getters.location.addressComponent.city || this.$store.getters.location.addressComponent.province
+      }
+  },
+  methods:{
+    getData(){
+      this.$axios("/api/profile/shopping").then(res => {
+        // console.log(res);
+        this.swipeImgs = res.data.swipeImgs;
+        this.entries = res.data.entries;
+      });
+    }
+  }
 }
 </script>
 
@@ -35,9 +79,10 @@ export default {
   overflow: auto;
   box-sizing: border-box;
 }
-.header {
+.header,
+.search_wrap{
   background-color: #009eef;
-  padding: 16px;
+  padding: 10px 16px;
 }
 .header .address_map {
   color: #fff;
@@ -54,12 +99,77 @@ export default {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.header .shop_search {
-  margin-top: 10px;
+.search_wrap .shop_search {
+  /* margin-top: 10px; */
   background-color: #fff;
   padding: 10px 0;
   border-radius: 4px;
   text-align: center;
   color: #aaa;
+}
+.search_wrap{
+  position: sticky;
+  top: 0px;
+  z-index: 999;
+  box-sizing: border-box;
+}
+.swiper{
+  height: 100px;
+}
+.swiper img{
+  width: 100%;
+  height: 100px;
+}
+
+.entries{
+  background: #fff;
+  height: 47.2vw;
+  text-align: center;
+  overflow: hidden;
+}
+.foodentry{
+  width: 20%;
+  float: left;
+  position: relative;
+  margin-top: 2.93333vw;
+}
+.foodentry .img_warp{
+  position: relative;
+  display: inline-block;
+  width: 12vw;
+  height: 12vw;
+}
+.img_warp img{
+  width: 100%;
+  height: 100%;
+}
+.foodentry span{
+  display: block;
+  color: #666;
+  font-size: 0.32rem;
+}
+
+/* 推荐商家 */
+.shoplist-title{
+  display: flex;
+  align-items: flex;
+  justify-content: center;
+  height: 9.6vw;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+}
+.shoplist-title:after,
+.shoplist-title:before{
+  display: block;
+  content: "一";
+  width: 5.333333vw;
+  height: 0.266667vw;
+}
+.shoplist-title:after{
+  margin-left: 3.466667vw; 
+}
+.shoplist-title:before{
+  margin-right: 3.466667vw;
 }
 </style>
