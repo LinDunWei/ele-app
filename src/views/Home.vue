@@ -7,7 +7,7 @@
                 <i class="fa fa-sort-desc"></i>
             </div>
         </div>
-        <div class="search_wrap">
+        <div class="search_wrap" :class="{'fixedview' : showFilter}">
             <div class="shop_search">
                 <i class="fa fa-search"></i>
                 搜索商家 商家名称
@@ -36,12 +36,16 @@
 
         <!-- 推荐商家 -->
         <div class="shoplist-title">推荐商家</div>
+
+        <!-- 导航 -->
+        <FilterView @update="update" @searchFixed = "showFilterView" :filterData = "filterData" />
     </div>
 
 </template>
 
 <script>
 import { Swipe, SwipeItem } from 'mint-ui';
+import FilterView from '../components/filterView';
 export default {
   created(){
       this.getData();
@@ -49,8 +53,13 @@ export default {
   data(){
     return{
       swipeImgs: [],
-      entries: []
+      entries: [],
+      filterData: null,
+      showFilter: false
     }
+  },
+  components:{
+    FilterView
   },
   computed:{
       address(){
@@ -67,6 +76,16 @@ export default {
         this.swipeImgs = res.data.swipeImgs;
         this.entries = res.data.entries;
       });
+      this.$axios("/api/profile/filter").then(res => {
+        console.log(res);
+        this.filterData = res.data;
+      });
+    },
+    showFilterView(isShow){
+      this.showFilter= isShow;
+    },
+    update(condation){
+      console.log(condation);
     }
   }
 }
@@ -171,5 +190,12 @@ export default {
 }
 .shoplist-title:before{
   margin-right: 3.466667vw;
+}
+
+.fixedview{
+  width: 100%;
+  position: fixed;
+  top: 0px;
+  z-index: 999;
 }
 </style>

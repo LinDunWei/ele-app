@@ -32,50 +32,27 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 
-## 内容总结 2019/8/6   
+## 内容总结 2019/8/7   
 
-> 天气：晴      
->
-> 此次更新内容有首页home.vue，引入mintUI。
->
-> 1.使用axios的拦截器，做请求拦截和响应拦截处理
->
-> 2.轮播图和分类滑块，mintUI的swipe组件
+> 实现排序导航
 
-cnpm安装完mintUI框架后，在mian.js中进行引入，同时请求和响应拦截时要做加载提示框的处理，引入UI组件`Indicator` ，发送请求时提示框开启，得到响应后关闭。
+先搞个排序导航组件（ filterView.vue ） 接受home.vue已经请求的数据
 
 ```js
-import Mint from 'mint-ui'
-import 'mint-ui/lib/style.css'
-import { Indicator } from 'mint-ui'    //mintUI的加载提示框
-
-// 添加请求拦截器
-axios.interceptors.request.use(function (config) {
-  // 在发送请求之前做些什么
-  //请求成功的话添加mintui的加载提示框
-  Indicator.open();
-  return config;
-}, function (error) {
-  // 对请求错误做些什么
-  return Promise.reject(error);
-});
-
-// 添加响应拦截器
-axios.interceptors.response.use(function (response) {
-  // 对响应数据做点什么
-
-  //响应成功的话关闭加载提示框
-  Indicator.close();
-  return response;
-}, function (error) {
-  // 对响应错误做点什么
-  return Promise.reject(error);
-});
-
-Vue.use(Mint);
+props:{
+    filterData: Object
+},
 ```
 
-回到home.vue，生命周期函数created 中执行`getData`函数，在函数里我们需要发送ajax获取轮播图数据
+home.vue 引入注册FilterView组件。
+
+1.绑定filterData事件，将axios请求到的filterData传值子组件filterView.vue
+
+```html
+<!--home.vue-->
+<!-- 导航 -->
+        <FilterView @update="update" @searchFixed = "showFilterView" :filterData = "filterData" />
+```
 
 ```js
 getData(){
@@ -84,37 +61,113 @@ getData(){
         this.swipeImgs = res.data.swipeImgs;
         this.entries = res.data.entries;
       });
+      this.$axios("/api/profile/filter").then(res => {
+        console.log(res);
+        this.filterData = res.data;
+      });
+    },
+```
+
+```vue
+<!--filterView.vue-->
+
+<template>
+    <div @click.self="hideView" :class="{'open' : isSort || isScreen}">
+        <!-- 导航 -->
+        <div v-if="filterData" class="filter_wrap">
+            <aside class="filter">
+                <div v-for="(item,index) in filterData.navTab" 
+                    :key="index" 
+                    class="filter_nav" 
+                    :class="{'filter-bold' : currentFilter == index}"
+                    @click="filterSort(index)">
+                    <span>{{item.name}}</span>
+                    <i v-if="item.icon" :class="'fa fa-'+ item.icon"></i>
+                </div>
+            </aside>
+        </div>
+        <!-- 排序 -->
+        <section class="filter-extend" v-if="isSort">
+            <ul>
+                <li v-for="(item,index) in filterData.sortBy" :key="index"
+                    @click="selectSort(item,index)">
+                    <span :class="{'selectName' : currentSort == index}">{{item.name}}</span>
+                    <i v-show="currentSort == index" class="fa fa-check"></i>
+                </li>
+            </ul>
+        </section>
+        <!-- 筛选 -->
+        <section class="filter-extend" v-if="isScreen">
+            <div class="filter-sort">
+                <div v-for="(screen,index) in filterData.screenBy" :key="index" class="morefilter">
+                    <p class="title">{{screen.title}}</p>
+                    <ul>
+                        <li v-for="(item,i) in screen.data" :key="i">
+                            <img v-if="item.icon" :src="item.icon" alt="">
+                            <span>{{item.name}}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="morefilter-btn">
+                <span class="morefilter-clear">清空</span>
+                <span class="morefilter-ok">确定</span>
+            </div>
+        </section>
+    </div>
+</template>
+```
+
+2.aside标签中，给每个下级div绑定点击事件filterSort，并传入索引。根据不同按钮实现不同操作。
+
+```js
+
+```
+
+3.isSort决定点击综合排序时面板的出现，同时也决定蒙层样式open作用与否，这里样式open设置在组件最外层。
+
+```css
+.open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all 0.5s ease-in-out;
+    z-index: 3;
     }
 ```
 
-引入swipe组件
+另外，虽然组件的top值为0，但受home.vue中搜索框样式的影响，无法实现搜索框和组件的置顶效果，这里则需要动态的修改搜索框的样式。绑定class`fixedview` ，由showFilter值决定。
 
-```js
-import { Swipe, SwipeItem } from 'mint-ui';
-```
-
-使用
-
-```vue
-<div id="container">
-  <!-- 轮播 -->
-  <mt-swipe :auto="4000" class="swiper">
-    <mt-swipe-item v-for="(img,index) in swipeImgs" :key="index">
-      <img :src="img" alt="">
-    </mt-swipe-item>
-  </mt-swipe>
-
-  <!-- 分类 -->
-  <mt-swipe :show-indicators="false" :auto="0" class="entries">
-    <mt-swipe-item class="entry_wrap" v-for="(entry,i) in entries" :key="i">
-      <div class="foodentry" v-for="(item,index) in entry" :key="index">
-        <div class="img_warp">
-          <img :src="item.image" alt="">
-        </div>
-        <span>{{item.name}}</span>
-      </div>
-    </mt-swipe-item>
-  </mt-swipe>
+```html
+<!-- home.vue -->
+<div class="search_wrap" :class="{'fixedview' : showFilter}">
+    <div class="shop_search">
+        <i class="fa fa-search"></i>
+        搜索商家 商家名称
+    </div>
 </div>
 ```
 
+4.给排序面板每一个li标签绑定`selectSort` 点击事件，传入item和index，更新列表数据由filterData.sortBy下的字段code决定，将code传递出去可以在home组件中操作数据的更新。
+
+```js
+selectSort(item,index){
+            this.currentSort = index;
+            //第一个导航的名字改变为综合排序下点击所得到的选项
+            this.filterData.navTab[0].name = this.filterData.sortBy[index].name;
+            //再把排序版隐藏
+            this.hideView();
+
+            //更新数据，在home里面，发送事件传递数据过去
+            this.$emit("update",{condation : item.code});
+        }
+```
+
+
+
+
+
+欲知后事如何，且看下回更新。。。
