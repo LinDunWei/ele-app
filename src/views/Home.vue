@@ -39,13 +39,27 @@
 
         <!-- 导航 -->
         <FilterView @update="update" @searchFixed = "showFilterView" :filterData = "filterData" />
+        <!-- 商家列表 -->
+        <mt-loadmore 
+            :top-method="loadData"     
+            :bottom-method="loadMore" 
+            :bottom-all-loaded="allLoaded"
+            :auto-fill="false"
+            :bottomPullText="bottomPullText" 
+            ref="loadmore">
+          <div class="shoplist">
+            <IndexShop v-for="(item,index) in restaurants" :key="index"
+                      :restaurant="item.restaurant" /> 
+          </div>
+        </mt-loadmore>
     </div>
 
 </template>
 
 <script>
-import { Swipe, SwipeItem } from 'mint-ui';
+import { Swipe, SwipeItem,Loadmore   } from 'mint-ui';
 import FilterView from '../components/filterView';
+import IndexShop from '../components//indexShop';
 export default {
   created(){
       this.getData();
@@ -55,11 +69,20 @@ export default {
       swipeImgs: [],
       entries: [],
       filterData: null,
-      showFilter: false
+      showFilter: false,
+      restaurants:[] ,   //所有商家
+      page: 1,
+      size: 5,
+
+      allLoaded: false,
+      bottomPullText: '加载更多',
+
+      josn: null
     }
   },
   components:{
-    FilterView
+    FilterView,
+    IndexShop
   },
   computed:{
       address(){
@@ -80,12 +103,52 @@ export default {
         console.log(res);
         this.filterData = res.data;
       });
+      this.loadData();
     },
     showFilterView(isShow){
       this.showFilter= isShow;
     },
     update(condation){
-      console.log(condation);
+      // console.log(condation);
+      this.json = condation;
+      this.loadData();
+    },
+
+
+    loadData(){
+      this.page= 1;
+      this.allLoaded = false;
+      this.bottomPullText = "加载更多";
+      // 拉去商家信息
+      this.$axios.post(`/api/profile/restaurants/${this.page}/${this.size}`,this.json).then(res => {
+        console.log(res.data);
+
+        this.$refs.loadmore.onTopLoaded();  //数据更新后关闭加载中动画
+        this.restaurants = res.data;
+      })
+    },
+    loadMore(){
+      if(!this.allLoaded){
+        this.page++;
+        // 拉去商家信息
+        this.$axios.post(`/api/profile/restaurants/${this.page}/${this.size}`).then(res => {
+          this.$refs.loadmore.onBottomLoaded();  //数据更新后关闭加载中动画
+
+          if(res.data.length > 0){
+            res.data.forEach(item=>{
+              this.restaurants.push(item);
+            })
+            if(res.data.length < this.size){
+              this.allLoaded = true;
+              this.bottomPullText = "没有更多了哟"
+            }
+          }else{
+            //没有更多数据的时候
+            this.allLoaded = true;
+            this.bottomPullText = "没有更多了哟"
+          }
+        })
+      }
     }
   }
 }
@@ -197,5 +260,10 @@ export default {
   position: fixed;
   top: 0px;
   z-index: 999;
+}
+
+.mint-loadmore {
+  height: calc(100% - 95px);
+  overflow: auto;
 }
 </style>

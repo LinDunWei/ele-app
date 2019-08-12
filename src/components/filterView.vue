@@ -29,7 +29,10 @@
                 <div v-for="(screen,index) in filterData.screenBy" :key="index" class="morefilter">
                     <p class="title">{{screen.title}}</p>
                     <ul>
-                        <li v-for="(item,i) in screen.data" :key="i">
+                        <li :class="{'selected' : item.select}" 
+                            v-for="(item,i) in screen.data" 
+                            :key="i"
+                            @click="selectScreen(item,screen)">
                             <img v-if="item.icon" :src="item.icon" alt="">
                             <span>{{item.name}}</span>
                         </li>
@@ -37,8 +40,10 @@
                 </div>
             </div>
             <div class="morefilter-btn">
-                <span class="morefilter-clear">清空</span>
-                <span class="morefilter-ok">确定</span>
+                <span :class="{'edit': edit}" 
+                       class="morefilter-clear"
+                      @click="clearFilter">清空</span>
+                <span class="morefilter-ok" @click="filterOk">确定</span>
             </div>
         </section>
     </div>
@@ -58,6 +63,19 @@ export default {
             currentSort: 0
         }
     },
+    computed:{
+        edit(){
+            let edit = false;
+            this.filterData.screenBy.forEach(screen => {
+                screen.data.forEach( item => {
+                    if(item.select){
+                        edit = true;
+                    }
+                })
+            });
+            return edit;
+        }
+    },
     methods:{
         filterSort(index){
             this.currentFilter = index;
@@ -67,11 +85,11 @@ export default {
                     this.$emit('searchFixed', true)  //搜索框的位置顶上去，使他定位的top值为0
                     break;
                 case 1:
-                    this.$emit("update",{condation : this.filterData.navTab[1].condition});
+                    this.$emit("update",{condition : this.filterData.navTab[1].condition});
                     this.hideView();
                     break;
                 case 2:
-                    this.$emit("update",{condation : this.filterData.navTab[2].condition});
+                    this.$emit("update",{condition : this.filterData.navTab[2].condition});
                     this.hideView();
                     break;
                 case 3: 
@@ -97,7 +115,51 @@ export default {
             this.hideView();
 
             //更新数据，在home里面，发送事件传递数据过去
-            this.$emit("update",{condation : item.code});
+            this.$emit("update",{condition : item.code});
+        },
+        selectScreen(item,screen){
+            //根据id这个字段判断是否单选
+            if(screen.id !== "MPI"){
+                //单选
+                screen.data.forEach(ele => {
+                    ele.select = false;
+                })
+            }
+            item.select = !item.select;
+        },
+        clearFilter(){
+            this.filterData.screenBy.forEach(screen => {
+                screen.data.forEach( item => {
+                    item.select = false;
+                })
+            })
+        },
+        filterOk(){
+            let mpiStr = '';
+            let screenData = {
+                MPI : '',
+                offer : '',
+                per : ''
+            }
+            this.filterData.screenBy.forEach(screen => {
+                screen.data.forEach( (item,index) => {
+                    if(item.select){
+                        // 1.单选   2.多选
+                        if(screen.id !== "MPI"){
+                            //单选
+                            screenData[screen.id] = item.code;  //后端没做
+                        }else{
+                            //多选
+                            mpiStr += item.code + "," ;
+                            screenData[screen.id] = mpiStr;   //存入screenData对象的MPI字段
+                        }
+                    }
+                })
+            })
+            // console.log(mpiStr);
+            this.$emit("update",{condition : screenData});
+            //关闭蒙层面板
+            this.hideView();
         }
     }
 }
