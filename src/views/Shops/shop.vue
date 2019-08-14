@@ -12,13 +12,24 @@
                 <img :src="shopInfo.rst.image_path" alt="">
             </div>
         </nav>
-
+        <!-- 商家信息 -->
         <div class="index-rst">
             <div class="rst-name">
                 <span @click="showInfoModel = true">{{shopInfo.rst.name}}</span>
                 <i class="fa fa-caret-right"></i>
             </div>
+            <!-- 弹窗 -->
             <InfoModel @close="showInfoModel = false" :showInfoModel="showInfoModel" :rst="shopInfo.rst" />
+            <!-- 口碑 -->
+            <div class="rst-order">
+                <span>评分{{shopInfo.rst.rating}}</span>
+                <span>月售{{shopInfo.rst.recent_order_num}}单</span>
+                <span>蜂鸟专送约{{shopInfo.rst.order_lead_time}}分钟</span>
+            </div>
+            <!-- 优惠信息 -->
+            <Activity :activities="shopInfo.rst.activities"/>
+            <!-- 公告 -->
+            <p class="rst-promotion">{{shopInfo.rst.promotion_info}}</p>
         </div>
     </div>
 
@@ -26,6 +37,7 @@
 
 <script>
 import InfoModel from '../../components/Shops/InfoModel'
+import Activity from '../../components/Shops/Activity'
 export default {
     data(){
         return{
@@ -37,7 +49,8 @@ export default {
         this.getData();
     },
     components:{
-        InfoModel
+        InfoModel,
+        Activity
     },
     methods:{
         getData(){
