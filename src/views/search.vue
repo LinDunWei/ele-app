@@ -17,13 +17,14 @@
                 </div>
             </div>
             <div v-else>
-                <SearchIndex @click="shopItemClick" :data="result.restaurants" />
+                <SearchIndex @click="$router.push('/shop')" :data="result.restaurants" />
                 <SearchIndex @click="shopItemClick" :data="result.words" />
             </div>
         </div>
         <div class="container" v-if="showShop">
             <!-- 导航 -->
             <FilterView @update="update" :filterData = "filterData" />
+            <!-- InfiniteScroll 列表滑动加载 -->
             <div class="shoplist" v-infinite-scroll="loadMore" :infinite-scroll-disabled="loading">
                 <IndexShop v-for="(item,index) in restaurants" :key="index"
                         :restaurant="item.restaurant" /> 
