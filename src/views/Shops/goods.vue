@@ -22,16 +22,16 @@
         <!-- 商品分类 -->
         <div class="menuview">
             <!-- 左侧分类列表 -->
-            <div class="menu-wrapper">
+            <div class="menu-wrapper" ref="menuScroll">
                 <ul>
-                    <li v-for="(item,index) in shopInfo.menu" :key="index">
+                    <li :class="{'current' : currentIndex === index}" @click="selectMenu(index)" v-for="(item,index) in shopInfo.menu" :key="index">
                         <img  v-if="item.icon_url" :src="item.icon_url" alt="">
                         <span>{{item.name}}</span>
                     </li>
                 </ul>
             </div>
             <!-- 右侧商品内容 -->
-            <div class="foods-wrapper">
+            <div class="foods-wrapper" ref="foodScroll">
                 <ul>
                     <li class="food-list-hook" v-for="(item,index) in shopInfo.menu" :key="index">
                         <div class="category-title">
@@ -57,23 +57,46 @@
                 </ul>
             </div>
         </div>
+
+        <!-- 购物车 -->
+        <ShopCart :shopInfo="shopInfo" />
     </div>
 
 </template>
 
 <script>
 import CartsControll from '../../components/Shops/CartsControll'
+import ShopCart from '../../views/Shops/shopCart'
+import BScroll from 'better-scroll'
 export default {
     data(){
         return{
-            shopInfo: null
+            shopInfo: null,
+            menuScroll:{},  //左侧滚动对象
+            foodScroll:{}, //右侧滚动对象
+            scrollY: 0, //右侧菜单当前滚动到的y值
+            listHeight: []  //12个区域列表高度 
         }
     },
     created(){
         this.getData();
     },
     components:{
-        CartsControll
+        CartsControll,
+        ShopCart
+    },
+    computed:{
+        currentIndex(){
+            for(let i=0;i<this.listHeight.length; i++){
+                let height1 = this.listHeight[i];
+                let height2 = this.listHeight[i+1];
+
+                if(this.scrollY >= height1 && this.scrollY < height2){
+                    return i;
+                }
+            }
+            return 0
+        }
     },
     methods:{
         getData(){
@@ -94,7 +117,61 @@ export default {
 
                 this.shopInfo = res.data;
                 console.log(this.shopInfo);
+                //DOM已经更新了
+                this.$nextTick(()=>{
+                    this.initScroll();
+                    // 计算12个区的高度
+                    this.calculateHeight();
+                })
             })
+        },
+        initScroll(){
+            // 告诉BScroll哪个dom可以使用它
+            this.menuScroll = new BScroll(this.$refs.menuScroll,{
+                click: true
+            })
+
+            this.foodScroll = new BScroll(this.$refs.foodScroll,{
+                probeType: 3,  
+                click: true
+            });
+            // on 添加一个事件 详情看better-scroll文档
+            this.foodScroll.on("scroll", pos => {
+                // console.log(pos.y);
+                this.scrollY = Math.abs(Math.round(pos.y));
+            });
+        },
+
+
+        //左侧menu点击事件
+        selectMenu(index){
+            // console.log(index);
+            // 获取对应右侧内容
+            let foodlist = this.$refs.foodScroll.getElementsByClassName("food-list-hook");
+            //el代表点击左侧menu，右侧对应的内容，通过index进行了关联
+            let el = foodlist[index]; 
+
+            // console.log(el);
+
+            //滚动到对应节点 
+            this.foodScroll.scrollToElement(el,550);  //到哪，多少时长
+        },
+
+
+        // 计算12列表区高度
+        calculateHeight(){
+            let foodlist = this.$refs.foodScroll.getElementsByClassName("food-list-hook");
+            //添加每个区的高度到数组
+            let height = 0;
+            this.listHeight.push(height);
+
+            for(let i=0; i< foodlist.length - 1; i++ ){
+                let item = foodlist[i];
+                //累加
+                height += item.clientHeight;
+                this.listHeight.push(height);
+            }
+            console.log(this.listHeight);
         }
     }
 }
