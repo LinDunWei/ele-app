@@ -32,6 +32,6 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 
-## 内容总结 2019/8/17   
+## 内容总结 2019/8/18   
 
-> 更新内容：购物车组件的封装和计算数量总价
+> 更新内容：显示隐藏购物车列表
