@@ -39,7 +39,7 @@
                             <span>{{item.description}}</span>
                         </div>
 
-                        <div class="fooddetails" v-for="(food,i) in item.foods" :key="i">
+                        <div @click="handleFood(food)" class="fooddetails" v-for="(food,i) in item.foods" :key="i">
                             <!-- 左 -->
                             <img :src="food.image_path" alt="">
                             <!-- 右 -->
@@ -60,6 +60,9 @@
 
         <!-- 购物车 -->
         <ShopCart :shopInfo="shopInfo" />
+
+        <!-- 商品详情 -->
+        <Food :food="selectedFood" :isShow="showFood" @close="showFood=false"/>
     </div>
 
 </template>
@@ -68,6 +71,7 @@
 import CartsControll from '../../components/Shops/CartsControll'
 import ShopCart from '../../views/Shops/shopCart'
 import BScroll from 'better-scroll'
+import Food from '../../views/Shops/food'
 export default {
     data(){
         return{
@@ -75,7 +79,9 @@ export default {
             menuScroll:{},  //左侧滚动对象
             foodScroll:{}, //右侧滚动对象
             scrollY: 0, //右侧菜单当前滚动到的y值
-            listHeight: []  //12个区域列表高度 
+            listHeight: [],  //12个区域列表高度 
+            selectedFood: null,  //存储点击的商品对象
+            showFood: false,  //开关，决定Food组件是否显示
         }
     },
     created(){
@@ -83,7 +89,8 @@ export default {
     },
     components:{
         CartsControll,
-        ShopCart
+        ShopCart,
+        Food
     },
     computed:{
         currentIndex(){
@@ -172,6 +179,13 @@ export default {
                 this.listHeight.push(height);
             }
             console.log(this.listHeight);
+        },
+
+        //商品点击
+        handleFood(food){
+          console.log(food);
+          this.selectedFood = food;
+          this.showFood = true;
         }
     }
 }

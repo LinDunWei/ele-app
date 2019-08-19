@@ -34,4 +34,4 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## 内容总结 2019/8/18   
 
-> 更新内容：显示隐藏购物车列表
+> 更新内容：me.vue页面

@@ -76,7 +76,17 @@ const router =  new Router({
           component: ()=> import('./views/Shops/seller.vue')
         }
       ]
-    }
+    },
+    {
+      path:'/myAddress',
+      name: 'myAddress',
+      component: ()=> import('./views/Oeders/MyAddress.vue')
+    },
+    {
+      path:'/addAddress',
+      name: 'addAddress',
+      component: ()=> import('./views/Oeders/AddAddress.vue')
+    },
   ]
 })
 //路由守卫

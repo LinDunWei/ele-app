@@ -64,8 +64,9 @@ export default {
                 phone: this.phone,
                 code: this.verifyCode
             }).then(res=>{
+                console.log(res.data);
                 //成功，保存登录状态,转首页
-                localStorage.setItem("ele_login",true);    //这里保存的ele_login登录状态会作为路由重定向判断
+                localStorage.setItem("ele_login",res.data.user._id);    //这里保存的ele_login登录状态会作为路由重定向判断
                 this.$router.push("/");
             }).catch(err => {
                 console.log(err);
