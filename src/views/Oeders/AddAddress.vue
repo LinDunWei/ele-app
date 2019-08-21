@@ -1,19 +1,24 @@
 <template>
     <div class="addAddress">
         <Header :isLeft="true" :title="title" />
-
+        <!-- 表单 -->
         <div class="viewbody">
             <div class="content">
-                <FormBlock label="联系人" placeholder="姓名" :tags="sexes" @checkSex="checkSex" :sex="addressInfo.sex"/>
-                <FormBlock label="电话" placeholder="手机号码" />
-                <FormBlock label="地址" placeholder="小区/写字楼/学校等" icon="angle-right" />
-                <FormBlock label="门牌号" placeholder="101号楼4单元404" icon="edit" textarea="textarea" />
+                <FormBlock label="联系人" placeholder="姓名" v-model="addressInfo.name" :tags="sexes" @checkSex="checkSex" :sex="addressInfo.sex"/>
+                <FormBlock label="电话" placeholder="手机号码" v-model="addressInfo.phone"/>
+                <FormBlock label="地址" placeholder="小区/写字楼/学校等" v-model="addressInfo.address" icon="angle-right" @click="showSearch=true"/>
+                <FormBlock label="门牌号" placeholder="101号楼4单元404" v-model="addressInfo.bottom" icon="edit" textarea="textarea" />
                 <div class="formblock">
                     <div class="label-wrap">标签</div>
                     <TabTag :tags="tags" @checkTag="checkTag" :selectTag="addressInfo.tag"/>
                 </div>
             </div>
+            <div class="form-button-wrap ">
+                <button @click="handleSave" class="form-button">确定</button>
+            </div>
         </div>
+        <!-- 搜索地址页 -->
+        <AddressSearch @close="showSearch=false" :showSearch="showSearch" :addressInfo="addressInfo"/>
     </div>
 
 </template>
@@ -22,11 +27,14 @@
 import Header from '../../components/Header'
 import FormBlock from '../../components/Orders/FormBlock'
 import TabTag from "../../components/Orders/TabTag";
+import AddressSearch from "../../components/Orders/addressSearch"
+import { Toast } from 'mint-ui';
 export default {
     components:{
         Header,
         FormBlock,
-        TabTag
+        TabTag,
+        AddressSearch
     },
     data(){
         return{
@@ -35,8 +43,13 @@ export default {
             sexes:["先生","女士"],
             addressInfo:{
                 tag: "",
-                sex: ""
-            }
+                sex: "",
+                address: '',
+                name: '',
+                phone: '',
+                bottom: ''
+            },
+            showSearch: false
         }
     },
     methods:{
@@ -47,6 +60,34 @@ export default {
         checkSex(item){
             console.log(item);
             this.addressInfo.sex = item;
+        },
+        handleSave(){
+            // console.log(this.addressInfo);
+            if(!this.addressInfo.name){
+                this.showMsg("请输入联系人");
+                return
+            }
+            if(!this.addressInfo.phone){
+                this.showMsg("请输入手机号码");
+                return
+            }
+            if(!this.addressInfo.address){
+                this.showMsg("请输入收货地址");
+                return
+            }
+            this.addAddress();
+        },
+        showMsg(msg){    //mintUI 提示框
+            Toast({
+                message: msg,
+                position: 'bottom',
+                duration: 2000
+            });
+        },
+        addAddress(){   //存储数据
+            this.$axios.post(`/api/user/add_address/${localStorage.ele_login}`,this.addressInfo)
+            .then(res => this.$router.push('/myAddress'))
+            .catch(err => console.log(err)) 
         }
     }
 }
@@ -84,4 +125,22 @@ export default {
         font-weight: 700;
     }
 
+
+    /* 确定按钮 */
+    .form-button-wrap {
+    padding: 5.333333vw 4vw;
+    display: flex;
+    }
+    .form-button-wrap .form-button {
+    background: #00d762;
+    text-align: center;
+    border-radius: 0.533333vw;
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 5.066667vw;
+    color: #fff;
+    padding: 3.333333vw 0;
+    border: none;
+    font-weight: 500;
+    }
 </style>

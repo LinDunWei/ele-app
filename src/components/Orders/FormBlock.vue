@@ -1,16 +1,21 @@
 <template>
     <div class="formblock">
         <div class="label-wrap">{{label}}</div>
-        <div class="input-group-wrap">
+        <div class="input-group-wrap" @click="$emit('click')">
             <div class="input-wrap">
-                <input v-if="!textarea" :type="type" :value="value" :placeholder="placeholder" @click="$emit('input',$event.target.value)">
+                <input 
+                    v-if="!textarea" 
+                    :type="type" 
+                    :value="value" 
+                    :placeholder="placeholder" 
+                    @input="$emit('input',$event.target.value)">
 
                 <textarea 
                     v-else
                     :type="type" 
                     :value="value" 
                     :placeholder="placeholder" 
-                    @click="$emit('input',$event.target.value)"
+                    @input="$emit('input',$event.target.value)"
                     rows="2"
                     maxlength="100"
                 >
