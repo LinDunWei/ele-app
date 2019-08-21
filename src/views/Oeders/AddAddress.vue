@@ -41,16 +41,15 @@ export default {
             title: '新增收货地址',
             tags: ['家','学校','公司'],
             sexes:["先生","女士"],
-            addressInfo:{
-                tag: "",
-                sex: "",
-                address: '',
-                name: '',
-                phone: '',
-                bottom: ''
-            },
+            addressInfo:{},
             showSearch: false
         }
+    },
+    beforeRouteEnter(to,from,next){
+        next(vm => {
+            vm.addressInfo = to.params.addressInfo;
+            vm.title = to.params.title;
+        })
     },
     methods:{
         checkTag(item){
@@ -75,7 +74,11 @@ export default {
                 this.showMsg("请输入收货地址");
                 return
             }
-            this.addAddress();
+            if(this.title == "新增收货地址"){
+                this.addAddress();
+            }else{
+                this.editAddress();
+            }
         },
         showMsg(msg){    //mintUI 提示框
             Toast({
@@ -88,6 +91,12 @@ export default {
             this.$axios.post(`/api/user/add_address/${localStorage.ele_login}`,this.addressInfo)
             .then(res => this.$router.push('/myAddress'))
             .catch(err => console.log(err)) 
+        },
+        editAddress(){
+            this.$axios.post(`/api/user/edit_address/${localStorage.ele_login}/${this.addressInfo._id}`,this.addressInfo)
+            .then(res => {
+                this.$router.push('/myAddress')
+            })
         }
     }
 }

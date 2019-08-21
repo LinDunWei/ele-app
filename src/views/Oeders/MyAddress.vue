@@ -18,6 +18,10 @@
                         <span class="address-text">{{item.address}}</span>
                     </p>
                 </div>
+                <div class="address-card-edit">
+                    <i @click="handleEdit(item)" class="fa fa-edit"></i>
+                    <i @click="handleDelete(item)" class="fa fa-close"></i>
+                </div>
             </div>
         </div>   
 
@@ -41,17 +45,48 @@ export default {
     data(){
         return{
             title: '我的收货地址',
-            allAddress : ''
+            allAddress : []
         }
     },
     methods:{
         addAddress(){
-            this.$router.push('/addAddress');
+            this.$router.push({
+                name: "addAddress",
+                params:{
+                    title: '新增收货地址',
+                    addressInfo:{
+                        name: '',
+                        phone: '',
+                        sex: '',
+                        address: '',
+                        bottom: '',
+                        tag: ''
+                    }
+                }
+            });
         },
         getData(){
             this.$axios(`/api/user/user_info/${localStorage.ele_login}`).then(res=>{
                 console.log(res.data);
                 this.allAddress = res.data.myAddress;
+            })
+        },
+
+        // 编辑
+        handleEdit(item){
+            this.$router.push({
+                name: "addAddress",
+                params: {
+                    title: '编辑地址',
+                    addressInfo: item
+                }
+            })
+        },
+        // 删除
+        handleDelete(item){
+            this.$axios.delete(`/api/user/address/${localStorage.ele_login}/${item._id}`)
+            .then(res =>{
+                this.allAddress.splice(index,1);
             })
         }
     }
