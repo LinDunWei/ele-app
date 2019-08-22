@@ -87,6 +87,11 @@ const router =  new Router({
       name: 'addAddress',
       component: ()=> import('./views/Oeders/AddAddress.vue')
     },
+    {
+      path:'/settlement',
+      name: 'settlement',
+      component: ()=> import('./views/Oeders/Settlement.vue')
+    },
   ]
 })
 //路由守卫

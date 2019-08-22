@@ -32,8 +32,10 @@
             <p class="rst-promotion">{{shopInfo.rst.promotion_info}}</p>
         </div>
         <!-- 导航 -->
-        <NavBar />   
-        <router-view></router-view>     
+        <NavBar />
+        <keep-alive>
+          <router-view></router-view>     
+        </keep-alive>
     </div>
 
 </template>

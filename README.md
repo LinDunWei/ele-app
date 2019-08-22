@@ -32,10 +32,10 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 
-## 内容总结 2019/8/21   
+## 内容总结 2019/8/22   
 
-> 更新内容：更新了**myAddress**我的地址页中，编辑地址和删除地址的功能。
+> 更新内容：更新了**shop.vue**页面中，导航组件切换时，给 **router-view** 添加了  **keep-alive** 标签，达到一个缓存的作用，同理在  **APP.vue**  中也使用它，在点击 **去结算** 按钮，路由跳转到结算页面，及  **settlement.vue** 页面时，返回  **shop.vue** 时有一个缓存，不至于之前点击添加购物车的数据丢失。
 >
-> 注意点：**myAddress**和**addAddress**在路由跳转时是要把参数**addressInfo**对象带过去的，编辑地址和新增地址都是公用**addAddress**组件，只需在路由传参时修改**addressInfo**对象中的**title**值来区分，另外踩坑点是，在**我的**页面，及**Me**组件跳转到**addAddress**组件时页不要忘记传参**addressInfo**对象，不然会报错。
+> 另外，购物车结算使用了 **VUEX** 进行了存储。 
 >
 > 笔记待续。。。
