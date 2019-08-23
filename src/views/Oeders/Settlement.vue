@@ -2,7 +2,7 @@
     <!-- 结算页面 -->
     <div class="settlement">
         <Header :isLeft="true"  title="确认订单"/>
-        <div class="view-body">
+        <div class="view-body" v-if="orderInfo">
             <div>
                 <!-- 收货地址 -->
                 <section class="cart-address">
@@ -25,6 +25,10 @@
                         <span class="phone">{{userInfo.phone}}</span>
                     </h2>
                 </section>
+                <!-- 送达时间 -->
+                <Delivery :shopInfo="orderInfo.shopInfo" />
+                <!-- 订单内容 -->
+                <CartGroup :orderInfo="orderInfo" :totalPrice="totalPrice" />
             </div>
         </div>
     </div>
@@ -33,9 +37,13 @@
 
 <script>
 import Header from '../../components/Header'
+import Delivery from '../../components/Orders/Delivery'
+import CartGroup from '../../components/Orders/CartGroup'
 export default {
     components:{
-        Header
+        Header,
+        Delivery,
+        CartGroup
     },
     data(){
         return{
@@ -52,6 +60,12 @@ export default {
     computed:{
         userInfo(){
             return this.$store.getters.userInfo;
+        },
+        orderInfo(){
+            return this.$store.getters.orderInfo;
+        },
+        totalPrice(){
+            return this.$store.getters.totalPrice;
         }
     },
     methods:{
