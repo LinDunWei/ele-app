@@ -97,6 +97,11 @@ const router =  new Router({
       name: 'remark',
       component: ()=> import('./views/Oeders/Remark.vue')
     },
+    {
+      path:'/pay',
+      name: 'pay',
+      component: ()=> import('./views/Oeders/Pay.vue')
+    },
   ]
 })
 //路由守卫

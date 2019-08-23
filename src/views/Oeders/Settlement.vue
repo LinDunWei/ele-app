@@ -39,6 +39,12 @@
                 <TableWare :isShow="showTableWare" @close="showTableWare = false"/>
             </div>
         </div>
+
+        <!-- 底部 -->
+        <footer class="action-bar">
+            <span>￥{{totalPrice}}</span>
+            <button @click="handlePay">去支付</button>
+        </footer>
     </div>
 
 </template>
@@ -49,6 +55,7 @@ import Delivery from '../../components/Orders/Delivery'
 import CartGroup from '../../components/Orders/CartGroup'
 import CartItem from '../../components/Orders/CartItem'
 import TableWare from '../../components/Orders/Tableware'
+import { Toast } from 'mint-ui';
 export default {
     components:{
         Header,
@@ -111,6 +118,18 @@ export default {
                     this.haveAddress = false
                 }
             });
+        },
+
+        handlePay(){
+            if(!this.userInfo){
+                Toast({
+                    message: '请选择收货地址',
+                    position: 'bottom',
+                    duration: 2000
+                });
+                return
+            }
+            this.$router.push('/pay');
         }
     }
 }
