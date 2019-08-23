@@ -89,7 +89,12 @@ export default {
         },
         addAddress(){   //存储数据
             this.$axios.post(`/api/user/add_address/${localStorage.ele_login}`,this.addressInfo)
-            .then(res => this.$router.push('/myAddress'))
+            .then(res => {
+                if(!this.$store.getters.userInfo){
+                    this.$store.dispatch('setUserInfo',addressInfo);
+                }
+                this.$router.push('/myAddress');
+            })
             .catch(err => console.log(err)) 
         },
         editAddress(){
