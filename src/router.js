@@ -92,6 +92,11 @@ const router =  new Router({
       name: 'settlement',
       component: ()=> import('./views/Oeders/Settlement.vue')
     },
+    {
+      path:'/remark',
+      name: 'remark',
+      component: ()=> import('./views/Oeders/Remark.vue')
+    },
   ]
 })
 //路由守卫

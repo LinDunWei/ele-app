@@ -8,7 +8,8 @@ const types= {
   SET_LOCATION : "SET_LOCATION",
   SET_ADDRESS : "SET_ADDRESS",
   ORDER_INFO : 'ORDER_INFO',
-  USER_INFO : "USER_INFO"
+  USER_INFO : "USER_INFO",
+  REMARK_INFO : "REMARK_INFO"   //餐具分数
 }
 
 //state
@@ -16,7 +17,11 @@ const state = {
   location : {},
   address: "",
   orderInfo: null,
-  userInfo: null
+  userInfo: null,
+  remarkInfo: {
+    tableware: '',
+    remark: ''
+  }
 }
 
 //getters
@@ -35,7 +40,8 @@ const getters = {
       price += state.orderInfo.shopInfo.float_delivery_fee;
     }
     return price;
-  }
+  },
+  remarkInfo: state => state.remarkInfo
 }
 
 
@@ -68,6 +74,13 @@ const mutations = {
     }else{
       state.userInfo = null
     }
+  },
+  [types.REMARK_INFO](state,remarkInfo){
+    if(remarkInfo){
+      state.remarkInfo = remarkInfo
+    }else{
+      state.remarkInfo = null
+    }
   }
 }
 
@@ -85,6 +98,9 @@ const actions = {
   },
   setUserInfo: ({commit},userInfo) => {
     commit(types.USER_INFO,userInfo);
+  },
+  setRemarkInfo: ({commit},remarkInfo) => {
+    commit(types.REMARK_INFO,remarkInfo);
   }
 }
 

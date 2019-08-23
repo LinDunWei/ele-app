@@ -29,6 +29,14 @@
                 <Delivery :shopInfo="orderInfo.shopInfo" />
                 <!-- 订单内容 -->
                 <CartGroup :orderInfo="orderInfo" :totalPrice="totalPrice" />
+                <!-- 备注信息 -->
+                <section class="checkout-section">
+                    <CartItem title="餐具分数" :subHead="remarkInfo.tableware || '未选择'" @click="showTableWare = true"/>
+                    <CartItem title="订单备注" :subHead="remarkInfo.remark || '口味 偏好'" @click="$router.push('/remark')" />
+                    <CartItem title="发票信息" subHead="不需要开发票" />
+                </section>
+
+                <TableWare :isShow="showTableWare" @close="showTableWare = false"/>
             </div>
         </div>
     </div>
@@ -39,15 +47,20 @@
 import Header from '../../components/Header'
 import Delivery from '../../components/Orders/Delivery'
 import CartGroup from '../../components/Orders/CartGroup'
+import CartItem from '../../components/Orders/CartItem'
+import TableWare from '../../components/Orders/Tableware'
 export default {
     components:{
         Header,
         Delivery,
-        CartGroup
+        CartGroup,
+        CartItem,
+        TableWare
     },
     data(){
         return{
-            haveAddress: false
+            haveAddress: false,
+            showTableWare: false
         }
     },
     beforeRouteEnter(to,from,next){
@@ -66,6 +79,9 @@ export default {
         },
         totalPrice(){
             return this.$store.getters.totalPrice;
+        },
+        remarkInfo(){
+            return this.$store.getters.remarkInfo;
         }
     },
     methods:{
